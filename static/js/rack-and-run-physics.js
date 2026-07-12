@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-  const canvas = document.getElementById("gameCanvas");
+  const canvas = document.getElementById("physicsCanvas");
   const gameplayScreen = document.getElementById("gameplayScreen");
   const shootButton = document.getElementById("shootButton");
   const shotPower = document.getElementById("shotPower");
