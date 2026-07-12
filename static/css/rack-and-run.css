@@ -1450,3 +1450,158 @@ button:focus-visible {
     padding-inline: 9px;
   }
 }
+
+/* ===== RACK AND RUN PART 3B — FLAGSHIP LANDSCAPE ===== */
+
+.rotate-gate {
+  display: none;
+}
+
+.phone-rotation-icon {
+  position: relative;
+  width: 74px;
+  height: 52px;
+  margin: 0 auto 18px;
+}
+
+.phone-rotation-icon span {
+  position: absolute;
+  inset: 8px 18px;
+  border: 3px solid #67dff7;
+  border-radius: 9px;
+  box-shadow: 0 0 22px rgba(64, 214, 244, .3);
+  animation: flagshipPhoneRotate 2.2s ease-in-out infinite;
+}
+
+.phone-rotation-icon::after {
+  content: "↻";
+  position: absolute;
+  right: -2px;
+  top: -8px;
+  color: #d5aa4c;
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+@keyframes flagshipPhoneRotate {
+  0%,
+  20% {
+    transform: rotate(0deg);
+  }
+
+  60%,
+  100% {
+    transform: rotate(90deg);
+  }
+}
+
+@media (orientation: portrait) {
+  .gameplay-active {
+    overflow: hidden;
+  }
+
+  .gameplay-screen {
+    display: grid;
+    place-items: center;
+    min-height: 100dvh;
+  }
+
+  .gameplay-screen .game-hud,
+  .gameplay-screen .player-scoreboard,
+  .gameplay-screen .game-table-shell,
+  .gameplay-screen .shot-controls,
+  .gameplay-screen .game-message {
+    display: none;
+  }
+
+  .rotate-gate {
+    display: block;
+    width: min(88vw, 420px);
+    padding: 32px 24px;
+    border: 1px solid rgba(86, 219, 247, .42);
+    border-radius: 24px;
+    background:
+      radial-gradient(
+        circle at 50% 0,
+        rgba(20, 160, 201, .22),
+        transparent 58%
+      ),
+      linear-gradient(
+        145deg,
+        rgba(5, 30, 44, .98),
+        rgba(0, 8, 14, .99)
+      );
+    color: #ffffff;
+    text-align: center;
+    box-shadow:
+      0 28px 60px rgba(0, 0, 0, .58),
+      0 0 34px rgba(35, 194, 229, .14);
+  }
+
+  .rotate-gate strong {
+    display: block;
+    font-size: clamp(1.5rem, 7vw, 2.1rem);
+  }
+
+  .rotate-gate p {
+    margin: 10px 0 0;
+    color: #9dbbc6;
+    line-height: 1.55;
+  }
+}
+
+@media (orientation: landscape) {
+  .gameplay-screen {
+    width: 100vw;
+    min-height: 100dvh;
+    padding:
+      max(7px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(7px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+  }
+
+  .rotate-gate {
+    display: none;
+  }
+
+  .game-hud {
+    margin-bottom: 6px;
+  }
+
+  .player-scoreboard {
+    margin-bottom: 6px;
+  }
+
+  .player-card {
+    min-height: 48px;
+  }
+
+  .game-table-shell {
+    width: min(
+      100%,
+      calc((100dvh - 154px) * 2)
+    );
+    aspect-ratio: 2 / 1;
+    margin-inline: auto;
+    border-radius: 18px;
+  }
+
+  #gameCanvas {
+    width: 100%;
+    min-height: 0;
+    aspect-ratio: 2 / 1;
+  }
+
+  .shot-controls {
+    width: min(
+      100%,
+      calc((100dvh - 154px) * 2)
+    );
+    margin: 7px auto 0;
+  }
+
+  .game-message {
+    margin-top: 5px;
+  }
+}

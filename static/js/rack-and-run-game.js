@@ -11,6 +11,7 @@
   const shootButton = document.getElementById("shootButton");
   const gameMessage = document.getElementById("gameMessage");
   const turnLabel = document.getElementById("turnLabel");
+  const rotateGate = document.getElementById("rotateGate");
 
   if (!gameplayScreen || !gameCanvas) {
     return;
@@ -480,12 +481,23 @@
     const bounds = shell.getBoundingClientRect();
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
-    state.width = Math.max(320, Math.floor(bounds.width));
-    state.height = Math.max(
-      360,
-      Math.floor(Math.min(window.innerHeight * 0.68, state.width * 1.34))
+    const availableHeight = Math.max(
+      240,
+      window.innerHeight - 154
     );
-    state.scale = state.width / 760;
+
+    state.width = Math.max(
+      560,
+      Math.floor(
+        Math.min(
+          bounds.width,
+          availableHeight * 2
+        )
+      )
+    );
+
+    state.height = Math.floor(state.width / 2);
+    state.scale = state.width / 960;
 
     gameCanvas.width = Math.floor(state.width * pixelRatio);
     gameCanvas.height = Math.floor(state.height * pixelRatio);
@@ -539,6 +551,30 @@
     state.aiming = false;
   }
 
+  function landscapeReady() {
+    return window.innerWidth > window.innerHeight;
+  }
+
+  function syncGameplayOrientation() {
+    const ready = landscapeReady();
+
+    document.body.classList.toggle(
+      "rack-landscape-ready",
+      ready
+    );
+
+    if (rotateGate) {
+      rotateGate.setAttribute(
+        "aria-hidden",
+        ready ? "true" : "false"
+      );
+    }
+
+    if (!gameplayScreen.hidden && ready) {
+      window.requestAnimationFrame(resizeCanvas);
+    }
+  }
+
   function enterGameplay() {
     document.body.classList.add("gameplay-active");
 
@@ -555,9 +591,14 @@
     gameplayScreen.hidden = false;
     gameplayScreen.setAttribute("aria-hidden", "false");
 
+    syncGameplayOrientation();
+
     window.requestAnimationFrame(() => {
       gameplayScreen.classList.add("gameplay-screen-visible");
-      resizeCanvas();
+
+      if (landscapeReady()) {
+        resizeCanvas();
+      }
 
       if (shootButton) {
         shootButton.focus({ preventScroll: true });
@@ -632,11 +673,13 @@
   gameCanvas.addEventListener("pointercancel", endAim);
   gameCanvas.addEventListener("pointerleave", endAim);
 
-  window.addEventListener("resize", () => {
-    if (!gameplayScreen.hidden) {
-      resizeCanvas();
-    }
-  });
+  window.addEventListener("resize", syncGameplayOrientation);
+  window.addEventListener(
+    "orientationchange",
+    syncGameplayOrientation
+  );
+
+  syncGameplayOrientation();
 
   document.addEventListener("keydown", (event) => {
     if (
