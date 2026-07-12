@@ -481,18 +481,13 @@
     const bounds = shell.getBoundingClientRect();
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
-    const availableHeight = Math.max(
-      240,
-      window.innerHeight - 154
-    );
+    const availableWidth = Math.max(320, bounds.width);
+    const availableHeight = Math.max(160, bounds.height);
 
-    state.width = Math.max(
-      560,
-      Math.floor(
-        Math.min(
-          bounds.width,
-          availableHeight * 2
-        )
+    state.width = Math.floor(
+      Math.min(
+        availableWidth,
+        availableHeight * 2
       )
     );
 
