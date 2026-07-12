@@ -23,6 +23,9 @@
   const ROLLING_DRAG = 0.78;
   const STOP_SPEED = 7;
   const SETTLE_TIME = 0.32;
+  const BALL_RESTITUTION = 0.965;
+  const RAIL_RESTITUTION = 0.89;
+  const COLLISION_EPSILON = 0.001;
 
   const BALL_COLORS = {
     1: "#e4bd08",
@@ -779,6 +782,141 @@
     });
   }
 
+  function resolveRailCollision(ball) {
+    if (ball.pocketed) {
+      return;
+    }
+
+    const geometry = state.geometry;
+
+    const left =
+      geometry.clothX + ball.radius;
+
+    const right =
+      geometry.clothX +
+      geometry.clothWidth -
+      ball.radius;
+
+    const top =
+      geometry.clothY + ball.radius;
+
+    const bottom =
+      geometry.clothY +
+      geometry.clothHeight -
+      ball.radius;
+
+    if (ball.x < left) {
+      ball.x = left;
+      ball.vx =
+        Math.abs(ball.vx) * RAIL_RESTITUTION;
+    } else if (ball.x > right) {
+      ball.x = right;
+      ball.vx =
+        -Math.abs(ball.vx) * RAIL_RESTITUTION;
+    }
+
+    if (ball.y < top) {
+      ball.y = top;
+      ball.vy =
+        Math.abs(ball.vy) * RAIL_RESTITUTION;
+    } else if (ball.y > bottom) {
+      ball.y = bottom;
+      ball.vy =
+        -Math.abs(ball.vy) * RAIL_RESTITUTION;
+    }
+  }
+
+  function resolveBallCollision(first, second) {
+    if (
+      first.pocketed ||
+      second.pocketed
+    ) {
+      return false;
+    }
+
+    const dx = second.x - first.x;
+    const dy = second.y - first.y;
+
+    const minimumDistance =
+      first.radius + second.radius;
+
+    const distanceSquared =
+      dx * dx + dy * dy;
+
+    if (
+      distanceSquared <= COLLISION_EPSILON ||
+      distanceSquared >=
+        minimumDistance * minimumDistance
+    ) {
+      return false;
+    }
+
+    const distance = Math.sqrt(distanceSquared);
+    const normalX = dx / distance;
+    const normalY = dy / distance;
+
+    const overlap =
+      minimumDistance - distance;
+
+    const correction =
+      overlap * 0.5 + COLLISION_EPSILON;
+
+    first.x -= normalX * correction;
+    first.y -= normalY * correction;
+
+    second.x += normalX * correction;
+    second.y += normalY * correction;
+
+    const relativeVelocityX =
+      second.vx - first.vx;
+
+    const relativeVelocityY =
+      second.vy - first.vy;
+
+    const separatingVelocity =
+      relativeVelocityX * normalX +
+      relativeVelocityY * normalY;
+
+    if (separatingVelocity > 0) {
+      return true;
+    }
+
+    const impulse =
+      (-(1 + BALL_RESTITUTION) *
+        separatingVelocity) /
+      2;
+
+    const impulseX = impulse * normalX;
+    const impulseY = impulse * normalY;
+
+    first.vx -= impulseX;
+    first.vy -= impulseY;
+
+    second.vx += impulseX;
+    second.vy += impulseY;
+
+    return true;
+  }
+
+  function resolveAllBallCollisions() {
+    for (
+      let firstIndex = 0;
+      firstIndex < state.balls.length;
+      firstIndex += 1
+    ) {
+      for (
+        let secondIndex = firstIndex + 1;
+        secondIndex < state.balls.length;
+        secondIndex += 1
+      ) {
+        resolveBallCollision(
+          state.balls[firstIndex],
+          state.balls[secondIndex]
+        );
+      }
+    }
+  }
+
   function physicsStep(delta) {
     const drag = Math.exp(-ROLLING_DRAG * delta);
 
@@ -790,6 +928,8 @@
       ball.x += ball.vx * delta;
       ball.y += ball.vy * delta;
 
+      resolveRailCollision(ball);
+
       ball.vx *= drag;
       ball.vy *= drag;
 
@@ -798,6 +938,8 @@
         ball.vy = 0;
       }
     });
+
+    resolveAllBallCollisions();
 
     if (!state.moving) {
       return;
@@ -1021,6 +1163,8 @@
         moving: state.moving,
         aimAngle: state.aimAngle,
         shotNumber: state.shotNumber,
+        ballRestitution: BALL_RESTITUTION,
+        railRestitution: RAIL_RESTITUTION,
       };
     },
   });
