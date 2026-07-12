@@ -68,7 +68,7 @@ def health():
             "portal": PORTAL_NAME,
             "tagline": TAGLINE,
             "creator": CREATOR,
-            "phase": "title-screen-foundation",
+            "phase": "official-branding-and-interaction",
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     )

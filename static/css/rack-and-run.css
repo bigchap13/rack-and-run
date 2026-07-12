@@ -831,3 +831,59 @@ button:focus-visible {
     transition-duration: .001ms !important;
   }
 }
+
+/* ===== RACK AND RUN PART 2E ===== */
+
+.official-brand-stage {
+  position: relative;
+  width: min(100%, 760px);
+  aspect-ratio: 1 / .92;
+  margin: 0 auto 18px;
+  overflow: hidden;
+  border: 1px solid rgba(74, 211, 244, .28);
+  border-radius: 0 0 24px 24px;
+  background: #01070b;
+  box-shadow:
+    0 22px 48px rgba(0, 0, 0, .48),
+    0 0 34px rgba(21, 180, 225, .12);
+}
+
+.official-menu-art {
+  position: absolute;
+  inset: 0 auto auto 0;
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  user-select: none;
+  pointer-events: none;
+}
+
+.official-brand-shade {
+  position: absolute;
+  inset: auto 0 0;
+  height: 26%;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 7, 12, 0),
+      rgba(0, 7, 12, .72) 72%,
+      #01070b 100%
+    );
+  pointer-events: none;
+}
+
+.official-brand-stage + .table-stage {
+  margin-top: 0;
+}
+
+@media (max-width: 560px) {
+  .official-brand-stage {
+    width: 100%;
+    aspect-ratio: 1 / .94;
+    margin-bottom: 14px;
+    border-radius: 0 0 18px 18px;
+  }
+}
