@@ -891,14 +891,14 @@ button:focus-visible {
 /* ===== RACK AND RUN PART 2G — COMPLETE MOBILE RACK ===== */
 
 .rack-cluster {
-  --rack-ball: clamp(28px, 5.6vw, 38px);
-  --rack-step-x: calc(var(--rack-ball) * .88);
-  --rack-step-y: calc(var(--rack-ball) * 1.01);
+  --rack-ball: clamp(24px, 4.8vw, 32px);
+  --rack-step-x: calc(var(--rack-ball) * .87);
+  --rack-step-y: calc(var(--rack-ball) * .96);
 
   position: absolute;
   z-index: 6;
   top: 50%;
-  right: clamp(18px, 5vw, 46px);
+  right: clamp(36px, 7vw, 64px);
   display: block;
   width: calc(var(--rack-ball) + (var(--rack-step-x) * 4));
   height: calc(var(--rack-ball) + (var(--rack-step-y) * 4));
@@ -913,11 +913,11 @@ button:focus-visible {
   aspect-ratio: 1;
   display: grid;
   place-items: center;
-  border: 2px solid rgba(255, 255, 255, .42);
+  border: 1.5px solid rgba(255, 255, 255, .42);
   border-radius: 50%;
   color: #ffffff;
   font-family: Arial, sans-serif;
-  font-size: clamp(.55rem, 1.75vw, .76rem);
+  font-size: clamp(.5rem, 1.5vw, .7rem);
   font-style: normal;
   font-weight: 900;
   line-height: 1;
@@ -925,9 +925,9 @@ button:focus-visible {
     0 1px 2px #000000,
     0 0 3px #000000;
   box-shadow:
-    inset 5px 5px 7px rgba(255, 255, 255, .28),
-    inset -6px -7px 9px rgba(0, 0, 0, .48),
-    0 5px 8px rgba(0, 0, 0, .42);
+    inset 4px 4px 6px rgba(255, 255, 255, .28),
+    inset -5px -6px 8px rgba(0, 0, 0, .48),
+    0 4px 7px rgba(0, 0, 0, .42);
 }
 
 /* Apex */
@@ -1072,8 +1072,8 @@ button:focus-visible {
 
 @media (max-width: 560px) {
   .rack-cluster {
-    --rack-ball: clamp(27px, 8vw, 34px);
-    right: 22px;
+    --rack-ball: 28px;
+    right: 42px;
   }
 
   .cue-ball {
@@ -1087,7 +1087,7 @@ button:focus-visible {
 
 @media (max-width: 380px) {
   .rack-cluster {
-    --rack-ball: 27px;
-    right: 14px;
+    --rack-ball: 25px;
+    right: 28px;
   }
 }
