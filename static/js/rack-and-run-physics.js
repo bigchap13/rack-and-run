@@ -103,11 +103,16 @@
   }
 
   function calculateBallRadius(geometry) {
+    /*
+     * Regulation-scale baseline:
+     * ball diameter is approximately 4.5% of cloth height.
+     * Radius therefore stays near 2.25% of cloth height.
+     */
     return Math.max(
-      11,
+      8,
       Math.min(
-        23,
-        geometry.clothHeight * 0.0315
+        18,
+        geometry.clothHeight * 0.0225
       )
     );
   }
@@ -142,10 +147,10 @@
 
     const apexX =
       geometry.clothX +
-      geometry.clothWidth * 0.635;
+      geometry.clothWidth * 0.61;
 
     const stepX = radius * 1.74;
-    const stepY = radius * 2.01;
+    const stepY = radius * 2.005;
 
     const rack = [
       [1],
@@ -453,7 +458,7 @@
   }
 
   function drawPockets() {
-    const radius = state.ballRadius * 1.42;
+    const radius = state.ballRadius * 1.36;
 
     pocketPositions().forEach(([x, y]) => {
       const gradient =
@@ -976,7 +981,7 @@
     }
 
     const captureRadius =
-      ball.radius * 1.24;
+      ball.radius * 1.18;
 
     for (const [pocketX, pocketY] of pocketPositions()) {
       const dx = ball.x - pocketX;
