@@ -68,7 +68,7 @@ def health():
             "portal": PORTAL_NAME,
             "tagline": TAGLINE,
             "creator": CREATOR,
-            "phase": "official-branding-and-interaction",
+            "phase": "gameplay-table-foundation",
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     )

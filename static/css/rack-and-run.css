@@ -1091,3 +1091,362 @@ button:focus-visible {
     right: 28px;
   }
 }
+
+/* ===== RACK AND RUN PART 3A — GAMEPLAY FOUNDATION ===== */
+
+.gameplay-screen {
+  width: min(100%, 980px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding:
+    max(14px, env(safe-area-inset-top))
+    14px
+    max(24px, env(safe-area-inset-bottom));
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity .26s ease,
+    transform .26s ease;
+}
+
+.gameplay-screen[hidden] {
+  display: none;
+}
+
+.gameplay-screen-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gameplay-active {
+  overflow-y: auto;
+  background:
+    radial-gradient(
+      circle at 50% 0,
+      rgba(0, 116, 156, .22),
+      transparent 42%
+    ),
+    #01070c;
+}
+
+.game-hud {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.leave-game {
+  min-height: 46px;
+  padding: 8px 14px;
+  border: 1px solid rgba(91, 215, 243, .38);
+  border-radius: 12px;
+  background: rgba(4, 31, 46, .9);
+  color: #eafaff;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.match-status {
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.match-status span,
+.rack-status span {
+  color: #6fcfe7;
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.match-status strong {
+  color: #ffffff;
+  font-size: clamp(1rem, 4vw, 1.3rem);
+}
+
+.rack-status {
+  display: grid;
+  place-items: center;
+  min-width: 54px;
+  min-height: 46px;
+  border: 1px solid rgba(91, 215, 243, .28);
+  border-radius: 12px;
+  background: rgba(4, 31, 46, .78);
+}
+
+.rack-status strong {
+  color: #ffffff;
+  font-size: 1.1rem;
+}
+
+.player-scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.player-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  min-height: 62px;
+  padding: 8px 10px;
+  border: 1px solid rgba(99, 195, 220, .24);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(7, 32, 46, .94),
+      rgba(1, 13, 21, .97)
+    );
+}
+
+.active-player {
+  border-color: rgba(80, 225, 255, .72);
+  box-shadow:
+    0 0 18px rgba(51, 206, 239, .15),
+    inset 0 1px rgba(255, 255, 255, .08);
+}
+
+.player-avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  aspect-ratio: 1;
+  border: 2px solid #59d9f4;
+  border-radius: 50%;
+  background: #063d55;
+  color: #ffffff;
+  font-size: .72rem;
+  font-weight: 900;
+}
+
+.opponent-avatar {
+  border-color: #d6a640;
+  background: #493411;
+}
+
+.player-card div {
+  min-width: 0;
+}
+
+.player-card small {
+  display: block;
+  overflow: hidden;
+  color: #7898a5;
+  font-size: .62rem;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.player-card strong {
+  display: block;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: clamp(.82rem, 3vw, 1rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-card output {
+  color: #ffffff;
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.versus-mark {
+  color: #d8ae52;
+  font-size: .72rem;
+  font-weight: 900;
+}
+
+.game-table-shell {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #01070b;
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, .5),
+    0 0 28px rgba(33, 190, 229, .1);
+  touch-action: none;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  min-height: 360px;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.aim-guide-label {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 999px;
+  background: rgba(0, 9, 14, .72);
+  color: rgba(255, 255, 255, .72);
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.shot-controls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: end;
+  gap: 10px;
+  margin-top: 13px;
+}
+
+.shot-controls button {
+  min-height: 56px;
+  border-radius: 14px;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+#englishControl {
+  display: grid;
+  place-items: center;
+  min-width: 74px;
+  padding: 7px 10px;
+  border: 1px solid rgba(93, 205, 232, .34);
+  background: rgba(5, 37, 52, .92);
+  color: #ffffff;
+}
+
+#englishControl span {
+  color: #69cfe6;
+  font-size: .64rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.power-control {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.power-control label {
+  color: #a9c4ce;
+  font-size: .7rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#shotPower {
+  width: 100%;
+  min-height: 30px;
+  accent-color: #34cbea;
+}
+
+.shoot-button {
+  min-width: 88px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 205, 95, .75);
+  background:
+    linear-gradient(
+      145deg,
+      #d89a24,
+      #7b4a0b
+    );
+  color: #ffffff;
+  font-size: 1rem;
+  text-transform: uppercase;
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, .36),
+    inset 0 1px rgba(255, 255, 255, .25);
+}
+
+.shot-confirmed {
+  transform: scale(.95);
+  box-shadow:
+    0 0 0 4px rgba(244, 188, 69, .2),
+    0 8px 18px rgba(0, 0, 0, .38);
+}
+
+.game-message {
+  min-height: 24px;
+  margin: 12px 0 0;
+  color: #99b7c2;
+  font-size: .8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .gameplay-screen {
+    padding-inline: 8px;
+  }
+
+  .game-hud {
+    gap: 7px;
+  }
+
+  .leave-game {
+    min-height: 42px;
+    padding-inline: 10px;
+    font-size: .78rem;
+  }
+
+  .rack-status {
+    min-width: 48px;
+    min-height: 42px;
+  }
+
+  .player-scoreboard {
+    gap: 5px;
+  }
+
+  .player-card {
+    grid-template-columns: auto 1fr;
+    gap: 7px;
+    min-height: 58px;
+    padding: 7px;
+  }
+
+  .player-card output {
+    display: none;
+  }
+
+  .player-avatar {
+    width: 34px;
+  }
+
+  .shot-controls {
+    grid-template-columns: 70px 1fr 82px;
+    gap: 7px;
+  }
+
+  #englishControl {
+    min-width: 70px;
+    padding-inline: 6px;
+  }
+
+  .shoot-button {
+    min-width: 82px;
+    padding-inline: 9px;
+  }
+}

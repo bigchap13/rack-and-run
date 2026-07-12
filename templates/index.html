@@ -198,6 +198,95 @@
         <small>Creator of ChapNetAI</small>
       </footer>
     </section>
+
+    <section
+      id="gameplayScreen"
+      class="gameplay-screen"
+      aria-label="Rack and Run gameplay table"
+      aria-hidden="true"
+      hidden
+    >
+      <header class="game-hud">
+        <button
+          id="leaveGame"
+          class="leave-game"
+          type="button"
+          aria-label="Return to main menu"
+        >
+          ‹ Menu
+        </button>
+
+        <div class="match-status">
+          <span id="gameModeLabel">Exhibition Match</span>
+          <strong id="turnLabel">Break Shot</strong>
+        </div>
+
+        <div class="rack-status">
+          <span>Rack</span>
+          <strong>1</strong>
+        </div>
+      </header>
+
+      <section class="player-scoreboard" aria-label="Match scoreboard">
+        <article class="player-card active-player">
+          <span class="player-avatar" aria-hidden="true">P1</span>
+          <div>
+            <small>Player One</small>
+            <strong>You</strong>
+          </div>
+          <output id="playerScore">0</output>
+        </article>
+
+        <div class="versus-mark" aria-hidden="true">VS</div>
+
+        <article class="player-card">
+          <span class="player-avatar opponent-avatar" aria-hidden="true">AI</span>
+          <div>
+            <small>Opponent</small>
+            <strong>House Player</strong>
+          </div>
+          <output id="opponentScore">0</output>
+        </article>
+      </section>
+
+      <section class="game-table-shell">
+        <canvas
+          id="gameCanvas"
+          aria-label="Playable regulation pool table"
+        ></canvas>
+
+        <div class="aim-guide-label" aria-hidden="true">
+          Drag to aim
+        </div>
+      </section>
+
+      <section class="shot-controls" aria-label="Shot controls">
+        <button id="englishControl" type="button">
+          <span>Spin</span>
+          <strong>Center</strong>
+        </button>
+
+        <div class="power-control">
+          <label for="shotPower">Shot Power</label>
+          <input
+            id="shotPower"
+            type="range"
+            min="10"
+            max="100"
+            value="55"
+          >
+        </div>
+
+        <button id="shootButton" class="shoot-button" type="button">
+          Shoot
+        </button>
+      </section>
+
+      <p id="gameMessage" class="game-message" role="status">
+        Line up the break shot.
+      </p>
+    </section>
+
   </main>
 
   <script>
@@ -211,6 +300,9 @@
 
   <script
     src="{{ url_for('static', filename='js/rack-and-run.js') }}?v=2b"
+  ></script>
+  <script
+    src="{{ url_for('static', filename='js/rack-and-run-game.js') }}?v=3a"
   ></script>
 </body>
 </html>
