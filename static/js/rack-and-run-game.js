@@ -481,18 +481,20 @@
     const bounds = shell.getBoundingClientRect();
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
-    const availableWidth = Math.max(320, bounds.width);
-    const availableHeight = Math.max(160, bounds.height);
-
-    state.width = Math.floor(
-      Math.min(
-        availableWidth,
-        availableHeight * 2
-      )
+    state.width = Math.max(
+      320,
+      Math.floor(bounds.width)
     );
 
-    state.height = Math.floor(state.width / 2);
-    state.scale = state.width / 960;
+    state.height = Math.max(
+      160,
+      Math.floor(bounds.height)
+    );
+
+    state.scale = Math.min(
+      state.width / 960,
+      state.height / 480
+    );
 
     gameCanvas.width = Math.floor(state.width * pixelRatio);
     gameCanvas.height = Math.floor(state.height * pixelRatio);
