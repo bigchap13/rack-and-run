@@ -7,6 +7,7 @@
   const shotPower = document.getElementById("shotPower");
   const turnLabel = document.getElementById("turnLabel");
   const gameMessage = document.getElementById("gameMessage");
+  const playerScore = document.getElementById("playerScore");
 
   if (!canvas || !gameplayScreen || !shootButton) {
     return;
@@ -61,6 +62,9 @@
     settledFor: 0,
     cueAnimation: null,
     shotNumber: 0,
+    playerPoints: 0,
+    scratchPending: false,
+    pocketedThisShot: [],
   };
 
   function tableGeometry() {
@@ -118,6 +122,9 @@
       radius: state.ballRadius,
       isCue: number === 0,
       pocketed: false,
+      pocketScale: 1,
+      pocketTargetX: x,
+      pocketTargetY: y,
     };
   }
 
@@ -487,11 +494,15 @@
   }
 
   function drawBall(ball) {
-    if (ball.pocketed) {
+    if (
+      ball.pocketed &&
+      ball.pocketScale <= 0.02
+    ) {
       return;
     }
 
-    const radius = ball.radius;
+    const radius =
+      ball.radius * ball.pocketScale;
 
     const gradient =
       context.createRadialGradient(
@@ -917,16 +928,208 @@
     }
   }
 
+  function updatePlayerScore() {
+    if (!playerScore) {
+      return;
+    }
+
+    playerScore.value = state.playerPoints;
+    playerScore.textContent =
+      String(state.playerPoints);
+  }
+
+  function pocketBall(ball, pocketX, pocketY) {
+    if (ball.pocketed) {
+      return;
+    }
+
+    ball.pocketed = true;
+    ball.pocketTargetX = pocketX;
+    ball.pocketTargetY = pocketY;
+    ball.vx = 0;
+    ball.vy = 0;
+
+    if (ball.isCue) {
+      state.scratchPending = true;
+
+      if (gameMessage) {
+        gameMessage.textContent =
+          "Scratch — cue ball will return.";
+      }
+
+      return;
+    }
+
+    state.playerPoints += 1;
+    state.pocketedThisShot.push(ball.number);
+    updatePlayerScore();
+
+    if (gameMessage) {
+      gameMessage.textContent =
+        `Ball ${ball.number} pocketed.`;
+    }
+  }
+
+  function testPocketCollision(ball) {
+    if (ball.pocketed) {
+      return true;
+    }
+
+    const captureRadius =
+      ball.radius * 1.42;
+
+    for (const [pocketX, pocketY] of pocketPositions()) {
+      const dx = ball.x - pocketX;
+      const dy = ball.y - pocketY;
+
+      if (
+        dx * dx + dy * dy <=
+        captureRadius * captureRadius
+      ) {
+        pocketBall(ball, pocketX, pocketY);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function updatePocketedBall(ball, delta) {
+    if (!ball.pocketed) {
+      return;
+    }
+
+    const smoothing =
+      1 - Math.pow(0.0001, delta);
+
+    ball.x +=
+      (ball.pocketTargetX - ball.x) *
+      smoothing;
+
+    ball.y +=
+      (ball.pocketTargetY - ball.y) *
+      smoothing;
+
+    ball.pocketScale = Math.max(
+      0,
+      ball.pocketScale - delta * 4.8
+    );
+  }
+
+  function cueBallPlacementIsClear(
+    cue,
+    x,
+    y
+  ) {
+    return state.balls.every((ball) => {
+      if (
+        ball === cue ||
+        ball.pocketed
+      ) {
+        return true;
+      }
+
+      return (
+        Math.hypot(
+          ball.x - x,
+          ball.y - y
+        ) >=
+        cue.radius +
+          ball.radius +
+          2
+      );
+    });
+  }
+
+  function respawnCueBall() {
+    if (!state.scratchPending) {
+      return;
+    }
+
+    const cue = state.balls.find(
+      (ball) => ball.isCue
+    );
+
+    if (!cue) {
+      return;
+    }
+
+    const geometry = state.geometry;
+
+    const baseX =
+      geometry.clothX +
+      geometry.clothWidth * 0.28;
+
+    const baseY =
+      geometry.clothY +
+      geometry.clothHeight * 0.5;
+
+    const offsets = [
+      0,
+      cue.radius * 2.4,
+      -cue.radius * 2.4,
+      cue.radius * 4.8,
+      -cue.radius * 4.8,
+    ];
+
+    let respawnX = baseX;
+    let respawnY = baseY;
+
+    for (const offset of offsets) {
+      const candidateY = Math.max(
+        geometry.clothY + cue.radius,
+        Math.min(
+          geometry.clothY +
+            geometry.clothHeight -
+            cue.radius,
+          baseY + offset
+        )
+      );
+
+      if (
+        cueBallPlacementIsClear(
+          cue,
+          baseX,
+          candidateY
+        )
+      ) {
+        respawnY = candidateY;
+        break;
+      }
+    }
+
+    cue.x = respawnX;
+    cue.y = respawnY;
+    cue.vx = 0;
+    cue.vy = 0;
+    cue.pocketed = false;
+    cue.pocketScale = 1;
+    cue.pocketTargetX = respawnX;
+    cue.pocketTargetY = respawnY;
+
+    state.scratchPending = false;
+
+    if (gameMessage) {
+      gameMessage.textContent =
+        "Scratch — cue ball returned.";
+    }
+  }
+
   function physicsStep(delta) {
     const drag = Math.exp(-ROLLING_DRAG * delta);
 
     state.balls.forEach((ball) => {
       if (ball.pocketed) {
+        updatePocketedBall(ball, delta);
         return;
       }
 
       ball.x += ball.vx * delta;
       ball.y += ball.vy * delta;
+
+      if (testPocketCollision(ball)) {
+        return;
+      }
 
       resolveRailCollision(ball);
 
@@ -950,6 +1153,7 @@
 
       if (state.settledFor >= SETTLE_TIME) {
         state.settledFor = 0;
+        respawnCueBall();
         setMotionState(false);
       }
     } else {
@@ -1065,6 +1269,7 @@
 
     state.shotNumber += 1;
     state.settledFor = 0;
+    state.pocketedThisShot = [];
 
     state.cueAnimation = {
       startedAt: performance.now(),
@@ -1165,6 +1370,14 @@
         shotNumber: state.shotNumber,
         ballRestitution: BALL_RESTITUTION,
         railRestitution: RAIL_RESTITUTION,
+        playerPoints: state.playerPoints,
+        scratchPending: state.scratchPending,
+        pocketedThisShot: [
+          ...state.pocketedThisShot,
+        ],
+        activeBalls: state.balls.filter(
+          (ball) => !ball.pocketed
+        ).length,
       };
     },
   });
