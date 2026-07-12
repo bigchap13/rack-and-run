@@ -104,15 +104,14 @@
 
   function calculateBallRadius(geometry) {
     /*
-     * Regulation-scale baseline:
-     * ball diameter is approximately 4.5% of cloth height.
-     * Radius therefore stays near 2.25% of cloth height.
+     * The ball scale is derived only from the cloth height.
+     * This keeps the rack proportionate on every screen size.
      */
     return Math.max(
-      8,
+      7,
       Math.min(
-        18,
-        geometry.clothHeight * 0.0225
+        15,
+        geometry.clothHeight * 0.0185
       )
     );
   }
@@ -145,19 +144,35 @@
       geometry.clothY +
       geometry.clothHeight * 0.5;
 
+    /*
+     * Regulation foot spot:
+     * three quarters of the cloth length from the head rail.
+     * This aligns the apex ball with the middle diamond
+     * between the side pocket and the foot corner.
+     */
     const apexX =
       geometry.clothX +
-      geometry.clothWidth * 0.61;
+      geometry.clothWidth * 0.75;
 
-    const stepX = radius * 1.74;
-    const stepY = radius * 2.005;
+    /*
+     * Tight equilateral-triangle packing.
+     */
+    const stepX = radius * 1.735;
+    const stepY = radius * 2.0;
 
+    /*
+     * Legal eight-ball rack:
+     * - 1-ball at the apex
+     * - 8-ball in the center
+     * - one solid and one stripe in the rear corners
+     * - remaining balls distributed without numerical sequencing
+     */
     const rack = [
       [1],
-      [2, 3],
-      [4, 8, 5],
-      [6, 9, 10, 7],
-      [11, 12, 13, 14, 15],
+      [10, 2],
+      [4, 8, 12],
+      [13, 6, 3, 11],
+      [7, 14, 5, 9, 15],
     ];
 
     state.balls = [
@@ -458,7 +473,7 @@
   }
 
   function drawPockets() {
-    const radius = state.ballRadius * 1.36;
+    const radius = state.ballRadius * 1.32;
 
     pocketPositions().forEach(([x, y]) => {
       const gradient =
@@ -981,7 +996,7 @@
     }
 
     const captureRadius =
-      ball.radius * 1.18;
+      ball.radius * 1.15;
 
     for (const [pocketX, pocketY] of pocketPositions()) {
       const dx = ball.x - pocketX;
