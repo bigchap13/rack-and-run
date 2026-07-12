@@ -3,8 +3,12 @@
 (() => {
   const canvas = document.getElementById("gameCanvas");
   const gameplayScreen = document.getElementById("gameplayScreen");
+  const shootButton = document.getElementById("shootButton");
+  const shotPower = document.getElementById("shotPower");
+  const turnLabel = document.getElementById("turnLabel");
+  const gameMessage = document.getElementById("gameMessage");
 
-  if (!canvas || !gameplayScreen) {
+  if (!canvas || !gameplayScreen || !shootButton) {
     return;
   }
 
@@ -16,6 +20,9 @@
 
   const FIXED_STEP = 1 / 120;
   const MAX_FRAME_DELTA = 0.035;
+  const ROLLING_DRAG = 0.78;
+  const STOP_SPEED = 7;
+  const SETTLE_TIME = 0.32;
 
   const BALL_COLORS = {
     1: "#e4bd08",
@@ -45,6 +52,12 @@
     ballRadius: 16,
     balls: [],
     initialized: false,
+    aimAngle: 0,
+    aiming: false,
+    moving: false,
+    settledFor: 0,
+    cueAnimation: null,
+    shotNumber: 0,
   };
 
   function tableGeometry() {
@@ -592,18 +605,214 @@
     context.stroke();
   }
 
-  function drawScene() {
+  function cueBall() {
+    return state.balls.find(
+      (ball) => ball.isCue && !ball.pocketed
+    );
+  }
+
+  function drawAimAndCue(time) {
+    const cue = cueBall();
+
+    if (!cue || state.moving) {
+      return;
+    }
+
+    const directionX = Math.cos(state.aimAngle);
+    const directionY = Math.sin(state.aimAngle);
+
+    const guideLength = Math.max(
+      state.geometry.clothWidth,
+      state.geometry.clothHeight
+    );
+
+    context.save();
+
+    context.setLineDash([
+      Math.max(8, state.ballRadius * 0.7),
+      Math.max(7, state.ballRadius * 0.55),
+    ]);
+
+    context.lineWidth = Math.max(
+      2,
+      state.ballRadius * 0.11
+    );
+
+    context.strokeStyle =
+      "rgba(230, 248, 252, .72)";
+
+    context.beginPath();
+
+    context.moveTo(
+      cue.x + directionX * state.ballRadius * 1.35,
+      cue.y + directionY * state.ballRadius * 1.35
+    );
+
+    context.lineTo(
+      cue.x + directionX * guideLength,
+      cue.y + directionY * guideLength
+    );
+
+    context.stroke();
+    context.restore();
+
+    let pullback =
+      state.ballRadius * 3.2 +
+      (Number(shotPower?.value || 55) / 100) *
+        state.ballRadius *
+        2.2;
+
+    if (state.cueAnimation) {
+      const elapsed =
+        time - state.cueAnimation.startedAt;
+
+      if (elapsed < 140) {
+        pullback +=
+          (elapsed / 140) *
+          state.ballRadius *
+          2.4;
+      } else {
+        const strikeProgress = Math.min(
+          1,
+          (elapsed - 140) / 110
+        );
+
+        pullback =
+          state.ballRadius *
+          5.6 *
+          (1 - strikeProgress);
+      }
+    }
+
+    const tipX =
+      cue.x -
+      directionX *
+        (state.ballRadius + pullback);
+
+    const tipY =
+      cue.y -
+      directionY *
+        (state.ballRadius + pullback);
+
+    const cueLength = Math.max(
+      state.ballRadius * 12,
+      state.geometry.clothWidth * 0.3
+    );
+
+    const buttX =
+      tipX - directionX * cueLength;
+
+    const buttY =
+      tipY - directionY * cueLength;
+
+    const cueGradient =
+      context.createLinearGradient(
+        buttX,
+        buttY,
+        tipX,
+        tipY
+      );
+
+    cueGradient.addColorStop(0, "#311506");
+    cueGradient.addColorStop(0.18, "#763b15");
+    cueGradient.addColorStop(0.74, "#d7aa60");
+    cueGradient.addColorStop(0.94, "#f0ddb2");
+    cueGradient.addColorStop(1, "#35a5c2");
+
+    context.save();
+    context.lineCap = "round";
+    context.lineWidth = Math.max(
+      5,
+      state.ballRadius * 0.34
+    );
+    context.strokeStyle = cueGradient;
+    context.shadowColor = "rgba(0, 0, 0, .62)";
+    context.shadowBlur = 7;
+
+    context.beginPath();
+    context.moveTo(buttX, buttY);
+    context.lineTo(tipX, tipY);
+    context.stroke();
+
+    context.restore();
+  }
+
+  function drawScene(time) {
     if (!state.geometry) {
       return;
     }
 
     drawTable();
     state.balls.forEach(drawBall);
+    drawAimAndCue(time);
   }
 
-  function physicsStep() {
-    // Movement, collisions, rails, and pockets
-    // are added in the next small stacks.
+  function setMotionState(moving) {
+    if (moving === state.moving) {
+      return;
+    }
+
+    state.moving = moving;
+
+    if (window.RackAndRunMotion) {
+      window.RackAndRunMotion.reportBallMotion(moving);
+
+      if (!moving) {
+        window.RackAndRunMotion.reportBallMotion(false);
+        window.RackAndRunMotion.reportBallMotion(false);
+      }
+    }
+
+    if (turnLabel) {
+      turnLabel.textContent =
+        moving ? "Shot in Motion" : "Shot Ready";
+    }
+  }
+
+  function allBallsStopped() {
+    return state.balls.every((ball) => {
+      if (ball.pocketed) {
+        return true;
+      }
+
+      return Math.hypot(ball.vx, ball.vy) < STOP_SPEED;
+    });
+  }
+
+  function physicsStep(delta) {
+    const drag = Math.exp(-ROLLING_DRAG * delta);
+
+    state.balls.forEach((ball) => {
+      if (ball.pocketed) {
+        return;
+      }
+
+      ball.x += ball.vx * delta;
+      ball.y += ball.vy * delta;
+
+      ball.vx *= drag;
+      ball.vy *= drag;
+
+      if (Math.hypot(ball.vx, ball.vy) < STOP_SPEED) {
+        ball.vx = 0;
+        ball.vy = 0;
+      }
+    });
+
+    if (!state.moving) {
+      return;
+    }
+
+    if (allBallsStopped()) {
+      state.settledFor += delta;
+
+      if (state.settledFor >= SETTLE_TIME) {
+        state.settledFor = 0;
+        setMotionState(false);
+      }
+    } else {
+      state.settledFor = 0;
+    }
   }
 
   function frame(time) {
@@ -618,14 +827,176 @@
     state.previousTime = time;
     state.accumulator += delta;
 
+    if (
+      state.cueAnimation &&
+      time - state.cueAnimation.startedAt >= 250
+    ) {
+      strikeCueBall();
+    }
+
     while (state.accumulator >= FIXED_STEP) {
       physicsStep(FIXED_STEP);
       state.accumulator -= FIXED_STEP;
     }
 
-    drawScene();
+    drawScene(time);
     window.requestAnimationFrame(frame);
   }
+
+  function pointerPosition(event) {
+    const bounds = canvas.getBoundingClientRect();
+
+    return {
+      x:
+        (event.clientX - bounds.left) *
+        (state.width / bounds.width),
+      y:
+        (event.clientY - bounds.top) *
+        (state.height / bounds.height),
+    };
+  }
+
+  function updateAim(event) {
+    const cue = cueBall();
+
+    if (!cue || state.moving || state.cueAnimation) {
+      return;
+    }
+
+    const pointer = pointerPosition(event);
+
+    state.aimAngle = Math.atan2(
+      pointer.y - cue.y,
+      pointer.x - cue.x
+    );
+  }
+
+  function beginAim(event) {
+    if (
+      gameplayScreen.hidden ||
+      state.moving ||
+      state.cueAnimation
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    state.aiming = true;
+    canvas.setPointerCapture?.(event.pointerId);
+    updateAim(event);
+  }
+
+  function moveAim(event) {
+    if (!state.aiming) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    updateAim(event);
+  }
+
+  function endAim(event) {
+    if (!state.aiming) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    state.aiming = false;
+    canvas.releasePointerCapture?.(event.pointerId);
+  }
+
+  function shoot() {
+    const cue = cueBall();
+
+    if (
+      !cue ||
+      state.moving ||
+      state.cueAnimation
+    ) {
+      return;
+    }
+
+    state.shotNumber += 1;
+    state.settledFor = 0;
+
+    state.cueAnimation = {
+      startedAt: performance.now(),
+      power: Math.max(
+        0.08,
+        Number(shotPower?.value || 55) / 100
+      ),
+    };
+
+    setMotionState(true);
+
+    if (gameMessage) {
+      gameMessage.textContent =
+        `Shot power: ${Math.round(
+          state.cueAnimation.power * 100
+        )}%`;
+    }
+  }
+
+  function strikeCueBall() {
+    const cue = cueBall();
+
+    if (!cue || !state.cueAnimation) {
+      return;
+    }
+
+    const maximumSpeed = Math.max(
+      760,
+      state.geometry.clothWidth * 1.08
+    );
+
+    const speed =
+      maximumSpeed *
+      (0.22 + state.cueAnimation.power * 0.78);
+
+    cue.vx = Math.cos(state.aimAngle) * speed;
+    cue.vy = Math.sin(state.aimAngle) * speed;
+
+    state.cueAnimation = null;
+  }
+
+  canvas.addEventListener(
+    "pointerdown",
+    beginAim,
+    true
+  );
+
+  canvas.addEventListener(
+    "pointermove",
+    moveAim,
+    true
+  );
+
+  canvas.addEventListener(
+    "pointerup",
+    endAim,
+    true
+  );
+
+  canvas.addEventListener(
+    "pointercancel",
+    endAim,
+    true
+  );
+
+  shootButton.addEventListener(
+    "click",
+    (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      shoot();
+    },
+    true
+  );
 
   window.addEventListener("resize", resizeCanvas);
 
@@ -638,6 +1009,7 @@
 
   window.RackAndRunPhysics = Object.freeze({
     resetRack,
+    shoot,
 
     getState() {
       return {
@@ -646,6 +1018,9 @@
         ballRadius: state.ballRadius,
         ballCount: state.balls.length,
         initialized: state.initialized,
+        moving: state.moving,
+        aimAngle: state.aimAngle,
+        shotNumber: state.shotNumber,
       };
     },
   });
