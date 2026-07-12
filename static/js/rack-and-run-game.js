@@ -12,6 +12,14 @@
   const gameMessage = document.getElementById("gameMessage");
   const turnLabel = document.getElementById("turnLabel");
   const rotateGate = document.getElementById("rotateGate");
+  const gameHud = document.querySelector(".game-hud");
+  const playerScoreboard = document.querySelector(
+    ".player-scoreboard"
+  );
+  const shotControls = document.querySelector(".shot-controls");
+  const aimGuideLabel = document.querySelector(
+    ".aim-guide-label"
+  );
 
   if (!gameplayScreen || !gameCanvas) {
     return;
@@ -31,6 +39,9 @@
     aimAngle: 0,
     shotPower: 55,
     shotTaken: false,
+    physicsActive: false,
+    ballsMoving: false,
+    settledFrames: 0,
   };
 
   const ballColors = {
@@ -52,25 +63,26 @@
   };
 
   function tableGeometry() {
-    const safeMargin = Math.max(3, Math.min(state.width, state.height) * 0.008);
-    const safeWidth = state.width - safeMargin * 2;
-    const safeHeight = state.height - safeMargin * 2;
-    const tableRatio = 2;
+    const safeMargin = Math.max(
+      3,
+      Math.min(state.width, state.height) * 0.008
+    );
 
-    let outerWidth;
-    let outerHeight;
+    const outerX = safeMargin;
+    const outerY = safeMargin;
+    const outerWidth = state.width - safeMargin * 2;
+    const outerHeight = state.height - safeMargin * 2;
 
-    if (safeWidth / safeHeight >= tableRatio) {
-      outerHeight = safeHeight;
-      outerWidth = outerHeight * tableRatio;
-    } else {
-      outerWidth = safeWidth;
-      outerHeight = outerWidth / tableRatio;
-    }
-
-    const outerX = (state.width - outerWidth) / 2;
-    const outerY = (state.height - outerHeight) / 2;
-    const rail = Math.max(22, Math.min(54, outerWidth * 0.056));
+    const rail = Math.max(
+      22,
+      Math.min(
+        54,
+        Math.min(
+          outerWidth * 0.052,
+          outerHeight * 0.115
+        )
+      )
+    );
 
     return {
       outerX,
@@ -650,6 +662,7 @@
   }
 
   function exitGameplay() {
+    setGameplayChromeVisible(true);
     leaveFlagshipFullscreen();
     gameplayScreen.classList.remove("gameplay-screen-visible");
     gameplayScreen.setAttribute("aria-hidden", "true");
@@ -670,25 +683,99 @@
     }, 260);
   }
 
+  function setGameplayChromeVisible(visible) {
+    document.body.classList.toggle(
+      "shot-in-motion",
+      !visible
+    );
+
+    for (const element of [
+      gameHud,
+      playerScoreboard,
+      shotControls,
+      gameMessage,
+      aimGuideLabel,
+    ]) {
+      if (!element) {
+        continue;
+      }
+
+      element.setAttribute(
+        "aria-hidden",
+        visible ? "false" : "true"
+      );
+    }
+
+    window.setTimeout(() => {
+      if (!gameplayScreen.hidden) {
+        resizeCanvas();
+      }
+    }, 190);
+  }
+
+  function reportBallMotion(isMoving) {
+    state.physicsActive = true;
+    state.ballsMoving = Boolean(isMoving);
+
+    if (state.ballsMoving) {
+      state.settledFrames = 0;
+      setGameplayChromeVisible(false);
+      return;
+    }
+
+    state.settledFrames += 1;
+
+    if (state.settledFrames >= 3) {
+      setGameplayChromeVisible(true);
+    }
+  }
+
   function takeShot() {
     state.shotPower = Number(shotPower?.value || 55);
     state.shotTaken = true;
+    state.settledFrames = 0;
+
+    setGameplayChromeVisible(false);
 
     if (turnLabel) {
-      turnLabel.textContent = "Shot Ready";
+      turnLabel.textContent = "Shot in Motion";
     }
 
     if (gameMessage) {
       gameMessage.textContent =
-        `Break power set to ${state.shotPower}%. Physics activation is next.`;
+        `Shot power: ${state.shotPower}%`;
     }
 
     shootButton?.classList.add("shot-confirmed");
 
     window.setTimeout(() => {
       shootButton?.classList.remove("shot-confirmed");
-    }, 360);
+    }, 260);
+
+    /*
+     * Temporary lifecycle until the physics engine owns ball motion.
+     * Physics will call reportBallMotion(true/false) directly.
+     */
+    if (!state.physicsActive) {
+      window.setTimeout(() => {
+        setGameplayChromeVisible(true);
+
+        if (turnLabel) {
+          turnLabel.textContent = "Break Shot";
+        }
+      }, 900);
+    }
   }
+
+  window.RackAndRunMotion = Object.freeze({
+    reportBallMotion,
+    hideChrome() {
+      setGameplayChromeVisible(false);
+    },
+    showChrome() {
+      setGameplayChromeVisible(true);
+    },
+  });
 
   primaryPlay?.addEventListener(
     "click",
