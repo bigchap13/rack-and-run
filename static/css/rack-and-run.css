@@ -1754,14 +1754,15 @@ button:focus-visible {
     display: grid;
     grid-template-columns:
       58px
-      minmax(120px, 1fr)
-      clamp(82px, 12vw, 126px)
+      clamp(190px, 32vw, 420px)
+      minmax(112px, 16vw)
       76px;
     grid-template-rows: 1fr;
     grid-template-areas:
       "spin power pocket shoot";
     align-items: center;
-    gap: clamp(5px, 1vw, 10px);
+    justify-content: center;
+    gap: clamp(7px, 1.2vw, 14px);
     width: 100%;
     height: var(--game-control-shelf);
     margin: 0;
@@ -1808,9 +1809,11 @@ button:focus-visible {
   .power-control {
     grid-area: power;
     display: grid;
-    gap: 2px;
+    gap: 3px;
     width: 100%;
     min-width: 0;
+    max-width: 420px;
+    justify-self: end;
   }
 
   .power-control label {
@@ -1827,6 +1830,7 @@ button:focus-visible {
 
   .shoot-button {
     grid-area: shoot;
+    justify-self: start;
     width: 76px;
     min-width: 0;
     min-height: 42px;
@@ -1841,9 +1845,11 @@ button:focus-visible {
   }
 
   .aim-guide-label {
-    bottom: 9px;
+    bottom: 15px;
     opacity: 1;
-    transition: opacity var(--game-transition);
+    transition:
+      opacity var(--game-transition),
+      transform var(--game-transition);
   }
 
   body.shot-in-motion .gameplay-screen {
@@ -1885,10 +1891,11 @@ button:focus-visible {
   .shot-controls {
     grid-template-columns:
       52px
-      minmax(105px, 1fr)
-      clamp(72px, 11vw, 104px)
+      clamp(150px, 30vw, 300px)
+      minmax(88px, 14vw)
       68px;
-    gap: 5px;
+    justify-content: center;
+    gap: 6px;
     padding-top: 4px;
   }
 
@@ -1907,3 +1914,5 @@ button:focus-visible {
     font-size: .68rem;
   }
 }
+
+/* ===== RACK AND RUN PART 3I — BALANCED CONTROL SHELF ===== */
