@@ -2235,3 +2235,124 @@ button:focus-visible {
     font-size: .5rem;
   }
 }
+
+/* ===== RACK AND RUN PART 3G — COMPACT BOTTOM SHOT BAR ===== */
+
+@media (orientation: landscape) {
+  .shot-controls {
+    position: absolute;
+    z-index: 12;
+    top: auto;
+    right: auto;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: 50%;
+    display: grid;
+    grid-template-columns:
+      58px
+      minmax(120px, 190px)
+      76px;
+    grid-template-rows: 44px;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 5px;
+    border-radius: 13px;
+    background: rgba(0, 12, 20, .72);
+    transform: translateX(-50%);
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 10px 24px rgba(0, 0, 0, .38),
+      inset 0 1px rgba(255, 255, 255, .06);
+  }
+
+  #englishControl {
+    width: 58px;
+    min-width: 0;
+    min-height: 42px;
+    height: 42px;
+    padding: 3px;
+    border-radius: 10px;
+  }
+
+  #englishControl span {
+    font-size: .43rem;
+  }
+
+  #englishControl strong {
+    font-size: .72rem;
+  }
+
+  .power-control {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+  }
+
+  .power-control label {
+    margin: 0;
+    font-size: .45rem;
+    line-height: 1;
+  }
+
+  #shotPower {
+    width: 100%;
+    min-height: 22px;
+    margin: 0;
+  }
+
+  .shoot-button {
+    width: 76px;
+    min-width: 0;
+    min-height: 42px;
+    height: 42px;
+    padding: 3px;
+    border-radius: 10px;
+    font-size: .76rem;
+  }
+
+  .game-message {
+    left: max(9px, env(safe-area-inset-left));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    max-width: 28vw;
+    padding: 5px 9px;
+    font-size: .53rem;
+    transform: none;
+  }
+
+  .aim-guide-label {
+    bottom: 61px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .shot-controls {
+    grid-template-columns:
+      52px
+      minmax(105px, 160px)
+      68px;
+    grid-template-rows: 38px;
+    bottom: 5px;
+    padding: 4px;
+  }
+
+  #englishControl,
+  .shoot-button {
+    min-height: 36px;
+    height: 36px;
+  }
+
+  #englishControl {
+    width: 52px;
+  }
+
+  .shoot-button {
+    width: 68px;
+    font-size: .68rem;
+  }
+
+  .aim-guide-label {
+    bottom: 51px;
+  }
+}
