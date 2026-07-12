@@ -79,12 +79,12 @@
     const outerHeight = state.height - margin * 2;
 
     const rail = Math.max(
-      22,
+      16,
       Math.min(
-        54,
+        38,
         Math.min(
-          outerWidth * 0.052,
-          outerHeight * 0.115
+          outerWidth * 0.035,
+          outerHeight * 0.075
         )
       )
     );
@@ -107,7 +107,7 @@
       11,
       Math.min(
         23,
-        geometry.clothHeight * 0.044
+        geometry.clothHeight * 0.0315
       )
     );
   }
@@ -142,10 +142,10 @@
 
     const apexX =
       geometry.clothX +
-      geometry.clothWidth * 0.69;
+      geometry.clothWidth * 0.635;
 
-    const stepX = radius * 1.735;
-    const stepY = radius * 2.015;
+    const stepX = radius * 1.74;
+    const stepY = radius * 2.01;
 
     const rack = [
       [1],
@@ -453,7 +453,7 @@
   }
 
   function drawPockets() {
-    const radius = state.ballRadius * 1.58;
+    const radius = state.ballRadius * 1.42;
 
     pocketPositions().forEach(([x, y]) => {
       const gradient =
@@ -976,7 +976,7 @@
     }
 
     const captureRadius =
-      ball.radius * 1.42;
+      ball.radius * 1.24;
 
     for (const [pocketX, pocketY] of pocketPositions()) {
       const dx = ball.x - pocketX;
