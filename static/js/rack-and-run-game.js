@@ -52,13 +52,25 @@
   };
 
   function tableGeometry() {
-    const margin = Math.max(16, state.width * 0.035);
-    const outerX = margin;
-    const outerY = margin;
-    const outerWidth = state.width - margin * 2;
-    const outerHeight = state.height - margin * 2;
+    const safeMargin = Math.max(3, Math.min(state.width, state.height) * 0.008);
+    const safeWidth = state.width - safeMargin * 2;
+    const safeHeight = state.height - safeMargin * 2;
+    const tableRatio = 2;
 
-    const rail = Math.max(24, Math.min(52, outerWidth * 0.062));
+    let outerWidth;
+    let outerHeight;
+
+    if (safeWidth / safeHeight >= tableRatio) {
+      outerHeight = safeHeight;
+      outerWidth = outerHeight * tableRatio;
+    } else {
+      outerWidth = safeWidth;
+      outerHeight = outerWidth / tableRatio;
+    }
+
+    const outerX = (state.width - outerWidth) / 2;
+    const outerY = (state.height - outerHeight) / 2;
+    const rail = Math.max(22, Math.min(54, outerWidth * 0.056));
 
     return {
       outerX,
@@ -481,18 +493,20 @@
     const bounds = shell.getBoundingClientRect();
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
-    const availableWidth = Math.max(320, bounds.width);
-    const availableHeight = Math.max(160, bounds.height);
-
-    state.width = Math.floor(
-      Math.min(
-        availableWidth,
-        availableHeight * 2
-      )
+    state.width = Math.max(
+      320,
+      Math.floor(bounds.width || window.innerWidth)
     );
 
-    state.height = Math.floor(state.width / 2);
-    state.scale = state.width / 960;
+    state.height = Math.max(
+      180,
+      Math.floor(bounds.height || window.innerHeight)
+    );
+
+    state.scale = Math.min(
+      state.width / 960,
+      state.height / 480
+    );
 
     gameCanvas.width = Math.floor(state.width * pixelRatio);
     gameCanvas.height = Math.floor(state.height * pixelRatio);
@@ -570,7 +584,41 @@
     }
   }
 
-  function enterGameplay() {
+  async function enterFlagshipFullscreen() {
+    const target = document.documentElement;
+
+    try {
+      if (!document.fullscreenElement && target.requestFullscreen) {
+        await target.requestFullscreen();
+      }
+    } catch (error) {
+      console.info("Fullscreen unavailable:", error);
+    }
+
+    try {
+      if (
+        screen.orientation &&
+        typeof screen.orientation.lock === "function"
+      ) {
+        await screen.orientation.lock("landscape");
+      }
+    } catch (error) {
+      console.info("Landscape lock unavailable:", error);
+    }
+  }
+
+  async function leaveFlagshipFullscreen() {
+    try {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
+    } catch (error) {
+      console.info("Fullscreen exit unavailable:", error);
+    }
+  }
+
+  async function enterGameplay() {
+    await enterFlagshipFullscreen();
     document.body.classList.add("gameplay-active");
 
     if (splashScreen) {
@@ -602,6 +650,7 @@
   }
 
   function exitGameplay() {
+    leaveFlagshipFullscreen();
     gameplayScreen.classList.remove("gameplay-screen-visible");
     gameplayScreen.setAttribute("aria-hidden", "true");
 

@@ -2061,3 +2061,177 @@ button:focus-visible {
     width: 25px;
   }
 }
+
+/* ===== RACK AND RUN PART 3F — FULLSCREEN FLAGSHIP ===== */
+
+@media (orientation: landscape) {
+  .gameplay-screen {
+    position: fixed;
+    inset: 0;
+    display: block;
+    width: 100vw;
+    height: 100dvh;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #00070b;
+  }
+
+  .game-table-shell {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 0;
+    aspect-ratio: auto;
+  }
+
+  #gameCanvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .game-hud {
+    position: absolute;
+    z-index: 10;
+    top: max(7px, env(safe-area-inset-top));
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+    height: 36px;
+    margin: 0;
+    pointer-events: none;
+  }
+
+  .leave-game,
+  .rack-status,
+  .match-status {
+    background: rgba(0, 12, 20, .68);
+    backdrop-filter: blur(12px);
+  }
+
+  .leave-game,
+  .rack-status {
+    min-height: 34px;
+    height: 34px;
+    pointer-events: auto;
+  }
+
+  .match-status {
+    justify-self: center;
+    padding: 3px 14px;
+    border-radius: 999px;
+  }
+
+  .player-scoreboard {
+    position: absolute;
+    z-index: 10;
+    top: max(47px, calc(env(safe-area-inset-top) + 43px));
+    left: 50%;
+    width: min(62vw, 720px);
+    height: 38px;
+    margin: 0;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .player-card {
+    height: 38px;
+    min-height: 0;
+    padding: 3px 7px;
+    background: rgba(0, 12, 20, .62);
+    backdrop-filter: blur(12px);
+  }
+
+  .player-avatar {
+    width: 25px;
+  }
+
+  .player-card small {
+    font-size: .45rem;
+  }
+
+  .player-card strong {
+    font-size: .68rem;
+  }
+
+  .player-card output {
+    display: block;
+    font-size: .9rem;
+  }
+
+  .shot-controls {
+    position: absolute;
+    z-index: 11;
+    right: max(9px, env(safe-area-inset-right));
+    bottom: max(9px, env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: 68px minmax(135px, 210px) 84px;
+    grid-template-rows: 1fr;
+    align-items: center;
+    gap: 7px;
+    width: auto;
+    height: 58px;
+    margin: 0;
+    padding: 6px;
+    border: 1px solid rgba(78, 208, 239, .32);
+    border-radius: 15px;
+    background: rgba(0, 12, 20, .72);
+    backdrop-filter: blur(14px);
+  }
+
+  #englishControl {
+    width: 68px;
+    min-width: 0;
+    min-height: 46px;
+    height: 46px;
+  }
+
+  .power-control {
+    width: 100%;
+  }
+
+  .power-control label {
+    margin-bottom: 3px;
+    font-size: .5rem;
+  }
+
+  .shoot-button {
+    width: 84px;
+    min-width: 0;
+    min-height: 46px;
+    height: 46px;
+    padding: 4px;
+    font-size: .82rem;
+  }
+
+  .game-message {
+    position: absolute;
+    z-index: 10;
+    left: max(10px, env(safe-area-inset-left));
+    bottom: max(12px, env(safe-area-inset-bottom));
+    max-width: 34vw;
+    margin: 0;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(0, 12, 20, .68);
+    font-size: .57rem;
+    white-space: nowrap;
+    backdrop-filter: blur(10px);
+  }
+
+  .aim-guide-label {
+    bottom: 10px;
+    padding: 4px 9px;
+    font-size: .5rem;
+  }
+}
