@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#02070d">
+
+  <title>{{ portal_name }} — {{ app_name }}</title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/rack-and-run.css') }}?v=2b"
+  >
+</head>
+
+<body>
+  <canvas id="chalkCanvas" aria-hidden="true"></canvas>
+
+  <main class="game-shell">
+    <section
+      id="splashScreen"
+      class="splash-screen"
+      aria-label="Rack and Run title screen"
+    >
+      <img
+        class="canonical-art"
+        src="/title-art"
+        alt="ChapNet Pool Rack N Run title screen"
+      >
+
+      <div class="splash-overlay" aria-hidden="true"></div>
+
+      <button
+        id="enterGame"
+        class="enter-game"
+        type="button"
+      >
+        <span>Enter the Hall</span>
+        <strong>Tap to Play</strong>
+      </button>
+    </section>
+
+    <section
+      id="liveMenu"
+      class="live-menu"
+      hidden
+    >
+      <header class="title-stage">
+        <div class="portal-mark">
+          <span class="eight-ball">8</span>
+
+          <div>
+            <span>ChapNet</span>
+            <strong>Pool</strong>
+          </div>
+        </div>
+
+        <div class="game-title" aria-label="Rack N Run">
+          <span class="rack-word">Rack</span>
+          <span class="n-word">N</span>
+          <span class="run-word">Run</span>
+        </div>
+
+        <div class="tagline">
+          <span>The Table Is</span>
+          <strong>Yours</strong>
+        </div>
+      </header>
+
+      <section class="table-stage" aria-label="Animated pool table">
+        <div class="table-light-beam" aria-hidden="true"></div>
+
+        <div class="table-rail table-rail-top" aria-hidden="true"></div>
+        <div class="table-rail table-rail-bottom" aria-hidden="true"></div>
+
+        <div class="felt-lines" aria-hidden="true"></div>
+
+        <div class="cue-ball" aria-hidden="true">
+          <span>R</span>
+          <i></i>
+          <span>R</span>
+        </div>
+
+        <div class="rack-cluster" aria-hidden="true">
+          <i class="ball ball-one">1</i>
+          <i class="ball ball-two">2</i>
+          <i class="ball ball-three">3</i>
+          <i class="ball ball-four">4</i>
+          <i class="ball ball-five">5</i>
+          <i class="ball ball-six">6</i>
+          <i class="ball ball-seven">7</i>
+          <i class="ball ball-eight">8</i>
+          <i class="ball ball-nine">9</i>
+          <i class="ball ball-ten">10</i>
+        </div>
+
+        <div class="cue-stick" aria-hidden="true"></div>
+      </section>
+
+      <section class="menu-panel">
+        <button
+          id="primaryPlay"
+          class="primary-play"
+          type="button"
+          data-mode="career"
+        >
+          <span>Play</span>
+          <i>›</i>
+        </button>
+
+        <div id="modeGrid" class="mode-grid">
+          <button type="button" data-mode="career">
+            <i>🏆</i>
+            <span>Career Mode</span>
+          </button>
+
+          <button type="button" data-mode="quick-match">
+            <i>✕</i>
+            <span>Quick Match</span>
+          </button>
+
+          <button type="button" data-mode="practice">
+            <i>◎</i>
+            <span>Practice</span>
+          </button>
+
+          <button type="button" data-mode="tournament">
+            <i>⑧</i>
+            <span>Tournament</span>
+          </button>
+
+          <button type="button" data-mode="trick-shot-lab">
+            <i>◇</i>
+            <span>Trick Shot Lab</span>
+          </button>
+
+          <button type="button" data-mode="multiplayer">
+            <i>♟</i>
+            <span>Multiplayer</span>
+          </button>
+        </div>
+      </section>
+
+      <nav class="utility-nav" aria-label="Player tools">
+        <button type="button" data-panel="profile">
+          <i>♙</i>
+          <span>Profile</span>
+        </button>
+
+        <button type="button" data-panel="statistics">
+          <i>▥</i>
+          <span>Statistics</span>
+        </button>
+
+        <button type="button" data-panel="settings">
+          <i>⚙</i>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <section
+        id="selectionPanel"
+        class="selection-panel"
+        hidden
+      >
+        <div>
+          <span id="selectionType">Game Mode</span>
+          <h2 id="selectionTitle">Career Mode</h2>
+
+          <p id="selectionDescription">
+            Rise from the local pool hall to the world stage.
+          </p>
+        </div>
+
+        <button id="closeSelection" type="button">
+          Close
+        </button>
+      </section>
+
+      <footer class="creator-footer">
+        <span>Developed By</span>
+        <strong>{{ creator }}</strong>
+        <small>Creator of ChapNetAI</small>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    window.RACK_AND_RUN_BOOT = {
+      appName: {{ app_name|tojson }},
+      portalName: {{ portal_name|tojson }},
+      tagline: {{ tagline|tojson }},
+      creator: {{ creator|tojson }}
+    };
+  </script>
+
+  <script
+    src="{{ url_for('static', filename='js/rack-and-run.js') }}?v=2b"
+  ></script>
+</body>
+</html>
